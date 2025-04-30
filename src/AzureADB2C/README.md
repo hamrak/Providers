@@ -17,12 +17,31 @@ Please see the [Base Installation Guide](https://socialiteproviders.com/usage/),
     'redirect' => env('AADB2C_RedirectUri'),
     'domain' => env('AADB2C_Domain'),  // {your_domain}.b2clogin.com
     'policy' => env('AADB2C_Policy'),  // such as 'b2c_1_user_susi'
-    'default_algorithm' => env('AADB2C_DefaultAlgorithm'), // optional, decoding algorithm JWK key such as 'RS256'
+    'default_algorithm' => env('AADB2C_DefaultAlgorithm', 'RS256'), // decoding algorithm JWK key such as 'RS256'
+    'custom_domain' => env('AADB2C_CUSTOM_DOMAIN'), // optional - set to use your custom domain e.g. login.contoso.com
+    'tenant' => env('AADB2C_TENANT'), // optional - set to use your tenant ID or custom domain in place of the default onmicrosoft.com one
 ],
 ```
 
+To set up your Azure AD B2C custom domain, follow [these instructions](https://learn.microsoft.com/en-us/azure/active-directory-b2c/custom-domain?pivots=b2c-user-flow).
+
 ### Add provider event listener
 
+#### Laravel 11+
+
+In Laravel 11, the default `EventServiceProvider` provider was removed. Instead, add the listener using the `listen` method on the `Event` facade, in your `AppServiceProvider` `boot` method.
+
+* Note: You do not need to add anything for the built-in socialite providers unless you override them with your own providers.
+
+```php
+Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
+    $event->extendSocialite('azureadb2c', \SocialiteProviders\AzureADB2C\Provider::class);
+});
+```
+<details>
+<summary>
+Laravel 10 or below
+</summary>
 Configure the package's listener to listen for `SocialiteWasCalled` events.
 
 Add the event to your `listen[]` array in `app/Providers/EventServiceProvider`. See the [Base Installation Guide](https://socialiteproviders.com/usage/) for detailed instructions.
@@ -35,6 +54,7 @@ protected $listen = [
     ],
 ];
 ```
+</details>
 
 ### Usage
 

@@ -16,6 +16,7 @@ use Lcobucci\JWT\Validation\Constraint\IssuedBy;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\RequiredConstraintsViolated;
+use Psr\Http\Message\ResponseInterface;
 use SocialiteProviders\Manager\OAuth2\AbstractProvider;
 use SocialiteProviders\Manager\OAuth2\User;
 
@@ -25,9 +26,6 @@ class Provider extends AbstractProvider
 
     private const URL = 'https://appleid.apple.com';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = [
         'name',
         'email',
@@ -38,25 +36,14 @@ class Provider extends AbstractProvider
      */
     protected $encodingType = PHP_QUERY_RFC3986;
 
-    /**
-     * The separating character for the requested scopes.
-     *
-     * @var string
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase(self::URL.'/auth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return self::URL.'/auth/token';
     }
@@ -98,16 +85,6 @@ class Provider extends AbstractProvider
     /**
      * {@inheritdoc}
      */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     protected function getUserByToken($token)
     {
         static::verify($token);
@@ -120,13 +97,12 @@ class Provider extends AbstractProvider
      * Return the user given the identity token provided on the client
      * side by Apple.
      *
-     * @param string $token
+     * @param  string  $token
+     * @return User $user
      *
      * @throws InvalidStateException when token can't be parsed
-     *
-     * @return User $user
      */
-    public function userByIdentityToken(string $token): SocialiteUser
+    public function userByIdentityToken(string $token): User
     {
         $array = $this->getUserByToken($token);
 
@@ -136,8 +112,7 @@ class Provider extends AbstractProvider
     /**
      * Verify Apple jwt.
      *
-     * @param string $jwt
-     *
+     * @param  string  $jwt
      * @return bool
      *
      * @see https://appleid.apple.com/auth/keys
@@ -145,13 +120,13 @@ class Provider extends AbstractProvider
     public static function verify($jwt)
     {
         $jwtContainer = Configuration::forSymmetricSigner(
-            new AppleSignerNone(),
+            new AppleSignerNone,
             AppleSignerInMemory::plainText('')
         );
         $token = $jwtContainer->parser()->parse($jwt);
 
         $data = Cache::remember('socialite:Apple-JWKSet', 5 * 60, function () {
-            $response = (new Client())->get(self::URL.'/auth/keys');
+            $response = (new Client)->get(self::URL.'/auth/keys');
 
             return json_decode((string) $response->getBody(), true);
         });
@@ -162,7 +137,7 @@ class Provider extends AbstractProvider
         if (isset($publicKeys[$kid])) {
             $publicKey = openssl_pkey_get_details($publicKeys[$kid]->getKeyMaterial());
             $constraints = [
-                new SignedWith(new Sha256(), AppleSignerInMemory::plainText($publicKey['key'])),
+                new SignedWith(new Sha256, AppleSignerInMemory::plainText($publicKey['key'])),
                 new IssuedBy(self::URL),
                 new LooseValidAt(SystemClock::fromSystemTimezone()),
             ];
@@ -201,7 +176,7 @@ class Provider extends AbstractProvider
             }
 
             if ($this->hasInvalidState()) {
-                throw new InvalidStateException();
+                throw new InvalidStateException;
             }
         }
 
@@ -232,7 +207,7 @@ class Provider extends AbstractProvider
             );
         }
 
-        return (new User())
+        return (new User)
             ->setRaw($user)
             ->map([
                 'id'    => $user['sub'],
@@ -267,12 +242,11 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * @param string $token
-     * @param string $hint
+     * @param  string  $token
+     * @param  string  $hint
+     * @return \Psr\Http\Message\ResponseInterface
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
-     *
-     * @return \Psr\Http\Message\ResponseInterface
      */
     public function revokeToken(string $token, string $hint = 'access_token')
     {
@@ -282,6 +256,30 @@ class Provider extends AbstractProvider
                 'client_secret'   => $this->clientSecret,
                 'token'           => $token,
                 'token_type_hint' => $hint,
+            ],
+        ]);
+    }
+
+    /**
+     * Acquire a new access token using the refresh token.
+     *
+     * Refer to the documentation for the response structure (the `refresh_token` will be missing from the new response).
+     *
+     * @see https://developer.apple.com/documentation/sign_in_with_apple/tokenresponse
+     *
+     * @param  string  $refreshToken
+     * @return ResponseInterface
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function refreshToken($refreshToken): ResponseInterface
+    {
+        return $this->getHttpClient()->post($this->getTokenUrl(), [
+            RequestOptions::FORM_PARAMS => [
+                'client_id'       => $this->clientId,
+                'client_secret'   => $this->clientSecret,
+                'grant_type'      => 'refresh_token',
+                'refresh_token'   => $refreshToken,
             ],
         ]);
     }

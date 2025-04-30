@@ -10,31 +10,17 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'HARVEST';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected $scopes = [''];
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['client_account'];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://id.getharvest.com/oauth2/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://id.getharvest.com/api/v1/oauth2/token';
     }
@@ -59,22 +45,12 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'         => $user['id'],
             'first_name' => $user['first_name'],
             'last_name'  => $user['last_name'],
             'email'      => $user['email'],
             'avatar'     => $user['avatar_url'],
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

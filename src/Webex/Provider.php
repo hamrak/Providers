@@ -24,14 +24,8 @@ class Provider extends AbstractProvider
      */
     protected $version = 'v1';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['spark:people_read', 'spark:kms'];
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopeSeparator = ' ';
 
     /**
@@ -39,18 +33,12 @@ class Provider extends AbstractProvider
      */
     protected $encodingType = PHP_QUERY_RFC3986;
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase($this->originUrl.'/'.$this->version.'/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->originUrl.'/'.$this->version.'/access_token';
     }
@@ -60,12 +48,13 @@ class Provider extends AbstractProvider
      */
     protected function getUserByToken($token)
     {
-        $url = $this->originUrl.'/'.$this->version.'/people/me?callingData=true';
-
-        $response = $this->getHttpClient()->get($url, [
+        $response = $this->getHttpClient()->get("{$this->originUrl}/{$this->version}/people/me", [
             RequestOptions::HEADERS => [
                 'Authorization' => 'Bearer '.$token,
                 'Accept'        => 'application/json',
+            ],
+            RequestOptions::QUERY => [
+                'callingData' => 'true',
             ],
         ]);
 
@@ -77,14 +66,14 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'         => $user['id'],
-            'nickname'   => !empty($user['nickName']) ? $user['nickName'] : null,
-            'name'       => !empty($user['displayName']) ? $user['displayName'] : null,
-            'first_name' => !empty($user['firstName']) ? $user['firstName'] : null,
-            'last_name'  => !empty($user['lastName']) ? $user['lastName'] : null,
+            'nickname'   => ! empty($user['nickName']) ? $user['nickName'] : null,
+            'name'       => ! empty($user['displayName']) ? $user['displayName'] : null,
+            'first_name' => ! empty($user['firstName']) ? $user['firstName'] : null,
+            'last_name'  => ! empty($user['lastName']) ? $user['lastName'] : null,
             'email'      => $user['emails'][0],
-            'avatar'     => !empty($user['avatar']) ? $user['avatar'] : null,
+            'avatar'     => ! empty($user['avatar']) ? $user['avatar'] : null,
         ]);
     }
 }

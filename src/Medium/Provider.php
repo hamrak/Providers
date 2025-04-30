@@ -12,21 +12,12 @@ class Provider extends AbstractProvider
 
     protected $scopes = ['basicProfile'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://medium.com/m/oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://medium.com/m/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.medium.com/v1/tokens';
     }
@@ -53,20 +44,10 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'   => $user['data']['id'],
             'name' => $user['data']['name'],
 
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

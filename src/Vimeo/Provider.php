@@ -10,31 +10,16 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'VIMEO';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['public'];
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://api.vimeo.com/oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://api.vimeo.com/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.vimeo.com/oauth/access_token';
     }
@@ -61,20 +46,10 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => str_replace('/users/', null, $user['uri']),
             'nickname' => null, 'name' => $user['name'], 'email' => null,
             'avatar'   => null,
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

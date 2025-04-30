@@ -14,15 +14,11 @@ class Provider extends AbstractProvider
      * API URLs.
      */
     public const PROD_BASE_URL = 'https://app.franceconnect.gouv.fr/api/v1';
+
     public const TEST_BASE_URL = 'https://fcp.integ01.dev-franceconnect.fr/api/v1';
 
     public const IDENTIFIER = 'FRANCECONNECT';
 
-    /**
-     * The scopes being requested.
-     *
-     * @var array
-     */
     protected $scopes = [
         'openid',
         'given_name',
@@ -34,9 +30,6 @@ class Provider extends AbstractProvider
         'preferred_username',
     ];
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopeSeparator = ' ';
 
     /**
@@ -49,18 +42,12 @@ class Provider extends AbstractProvider
         return config('app.env') === 'production' ? self::PROD_BASE_URL : self::TEST_BASE_URL;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['logout_redirect'];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         //It is used to prevent replay attacks
         $this->parameters['nonce'] = Str::random(20);
@@ -68,10 +55,7 @@ class Provider extends AbstractProvider
         return $this->buildAuthUrlFromBase($this->getBaseUrl().'/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->getBaseUrl().'/token';
     }
@@ -92,22 +76,10 @@ class Provider extends AbstractProvider
     /**
      * {@inheritdoc}
      */
-    protected function getTokenFields($code)
-    {
-        return array_add(
-            parent::getTokenFields($code),
-            'grant_type',
-            'authorization_code'
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function user()
     {
         if ($this->hasInvalidState()) {
-            throw new InvalidStateException();
+            throw new InvalidStateException;
         }
 
         $response = $this->getAccessTokenResponse($this->getCode());
@@ -119,10 +91,10 @@ class Provider extends AbstractProvider
         //store tokenId session for logout url generation
         $this->request->session()->put('fc_token_id', Arr::get($response, 'id_token'));
 
-        return  $user->setTokenId(Arr::get($response, 'id_token'))
-                    ->setToken($token)
-                    ->setRefreshToken(Arr::get($response, 'refresh_token'))
-                    ->setExpiresIn(Arr::get($response, 'expires_in'));
+        return $user->setTokenId(Arr::get($response, 'id_token'))
+            ->setToken($token)
+            ->setRefreshToken(Arr::get($response, 'refresh_token'))
+            ->setExpiresIn(Arr::get($response, 'expires_in'));
     }
 
     /**
@@ -144,7 +116,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'                     => $user['sub'],
             'given_name'             => $user['given_name'],
             'family_name'            => $user['family_name'],

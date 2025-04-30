@@ -10,15 +10,9 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'ZOHO';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['aaaserver.profile.READ'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://accounts.zoho.com/oauth/v2/auth', $state);
     }
@@ -31,10 +25,7 @@ class Provider extends AbstractProvider
         return $this->request->input('accounts-server', 'https://accounts.zoho.com');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->getAccountsServerUrl().'/oauth/v2/token';
     }
@@ -58,22 +49,12 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['ZUID'],
             'email'    => $user['Email'],
             'nickname' => $user['Display_Name'],
             'name'     => $user['First_Name'].' '.$user['Last_Name'],
-            'avatar'   => !empty($user['images']) ? $user['images'][0]['url'] : null,
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
+            'avatar'   => ! empty($user['images']) ? $user['images'][0]['url'] : null,
         ]);
     }
 }

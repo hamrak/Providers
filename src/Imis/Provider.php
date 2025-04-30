@@ -15,9 +15,9 @@ class Provider extends AbstractProvider
     /**
      * Get the host Base URL.
      *
-     * @throws \RuntimeException
-     *
      * @return string
+     *
+     * @throws \RuntimeException
      */
     protected function getImisUrl(): string
     {
@@ -30,18 +30,11 @@ class Provider extends AbstractProvider
         return $host;
     }
 
-    /**
-     * {@inheritdoc}
-     * Get the login URL, Links to IMIS SSO Client Application.
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase($this->getImisUrl().$this->clientId.'.aspx', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getTokenUrl(): string
     {
         return $this->getImisUrl().'/token';
@@ -67,7 +60,6 @@ class Provider extends AbstractProvider
 
     /**
      * {@inheritdoc}
-     * Required fields to get the Bearer Token.
      */
     protected function getTokenFields($code)
     {
@@ -90,13 +82,13 @@ class Provider extends AbstractProvider
     protected function mapUserToObject(array $user)
     {
         // No IMIS guest users allowed. Throw an exception.
-        if (!isset($user['Items']['$values'][0]) || count($user['Items']['$values'][0]) < 1) {
+        if (! isset($user['Items']['$values'][0]) || (is_countable($user['Items']['$values'][0]) ? count($user['Items']['$values'][0]) : 0) < 1) {
             throw new InvalidArgumentException('Guest user is not allowed');
         }
 
         $user = $user['Items']['$values'][0];
 
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['sub'] ?? null,
             'nickname' => null,
             'name'     => trim(($user['given_name'] ?? '').' '.($user['family_name'] ?? '')),
@@ -105,9 +97,6 @@ class Provider extends AbstractProvider
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function additionalConfigKeys(): array
     {
         return ['host'];

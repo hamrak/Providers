@@ -12,27 +12,18 @@ class Provider extends AbstractProvider
 
     protected function getBaseUrl()
     {
-        $port = is_null($this->getServerPort()) ? '' : ':'.$this->getServerPort();
-        $subdirectory = is_null($this->getServerDirectory()) ? '' : '/'.$this->getServerDirectory();
+        $port = null === $this->getServerPort() ? '' : ':'.$this->getServerPort();
+        $subdirectory = null === $this->getServerDirectory() ? '' : '/'.$this->getServerDirectory();
 
         return 'https://'.$this->getServerHost().$port.$subdirectory;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            $this->getBaseUrl().'/sharing/rest/oauth2/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase($this->getBaseUrl().'/sharing/rest/oauth2/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->getBaseUrl().'/sharing/rest/oauth2/token';
     }
@@ -60,22 +51,12 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['username'],
             'nickname' => $user['username'],
             'name'     => $user['fullName'],
             'email'    => $user['email'],
             'avatar'   => $user['thumbnail'],
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 
@@ -86,11 +67,11 @@ class Provider extends AbstractProvider
 
     protected function getServerPort()
     {
-        return $this->getConfig('arcgis_port', null);
+        return $this->getConfig('arcgis_port');
     }
 
     protected function getServerDirectory()
     {
-        return $this->getConfig('arcgis_directory', null);
+        return $this->getConfig('arcgis_directory');
     }
 }

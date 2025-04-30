@@ -11,21 +11,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'BITLY';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://bitly.com/oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://bitly.com/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api-ssl.bitly.com/oauth/access_token';
     }
@@ -53,21 +44,11 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => null,
             'nickname' => $user['login'],
             'name'     => $user['name'],
             'email'    => Arr::collapse(Arr::where($user['emails'], fn ($value) => $value['is_primary']))['email'],
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

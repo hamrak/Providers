@@ -11,24 +11,15 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'GRAPH';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['User.Read'];
 
-    /**
-     * The separating character for the requested scopes.
-     *
-     * @var string
-     */
     protected $scopeSeparator = ' ';
 
     /**
      * Allows you to override the tenant id that the provider is configured
      * with.
      *
-     * @param string $tenantId
-     *
+     * @param  string  $tenantId
      * @return \SocialiteProviders\Graph\Provider
      */
     public function setTenantId($tenantId)
@@ -51,10 +42,7 @@ class Provider extends AbstractProvider
         return $this->getConfig('tenant_id', 'common');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase(
             sprintf(
@@ -65,10 +53,7 @@ class Provider extends AbstractProvider
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return sprintf(
             'https://login.microsoftonline.com/%s/oauth2/v2.0/token',
@@ -98,7 +83,7 @@ class Provider extends AbstractProvider
     {
         // Mapping default Laravel user keys to the keys that are nested in the
         // response from the provider.
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'    => $user['id'],
             'name'  => $user['displayName'],
             'email' => $user['mail'] ?? $user['userPrincipalName'],
@@ -118,20 +103,7 @@ class Provider extends AbstractProvider
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return [
             'tenant_id',

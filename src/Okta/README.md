@@ -19,6 +19,25 @@ Please see the [Base Installation Guide](https://socialiteproviders.com/usage/),
 ],
 ```
 
+#### Multi Tenant SSO
+
+If you need to authenticate users from multiple okta instances, you can dynamically set the configuration values prior to calling the `redirect`/`user` methods. You'll still need to add the services entry as per above, but you can leave all the values as `null`.
+
+```php
+$config = new \SocialiteProviders\Manager\Config(
+    'client_id',
+    'client_secret',
+    route('okta.callback'),
+    [
+        'base_url' => 'https://1234.okta.com',
+    ]
+);
+
+\Laravel\Socialite\Facades\Socialite::driver('okta')
+    ->setConfig($config)
+    ->redirect();
+```
+
 #### Custom Auth Server
 
 If you're using Okta Developer you should set `auth_server_id` config option appropriately. It should be set to "default", or to the server id of your Custom Authorization Server.
@@ -27,6 +46,21 @@ For more information, see the [okta docs](https://developer.okta.com/docs/concep
 
 ### Add provider event listener
 
+#### Laravel 11+
+
+In Laravel 11, the default `EventServiceProvider` provider was removed. Instead, add the listener using the `listen` method on the `Event` facade, in your `AppServiceProvider` `boot` method.
+
+* Note: You do not need to add anything for the built-in socialite providers unless you override them with your own providers.
+
+```php
+Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
+    $event->extendSocialite('okta', \SocialiteProviders\Okta\Provider::class);
+});
+```
+<details>
+<summary>
+Laravel 10 or below
+</summary>
 Configure the package's listener to listen for `SocialiteWasCalled` events.
 
 Add the event to your `listen[]` array in `app/Providers/EventServiceProvider`. See the [Base Installation Guide](https://socialiteproviders.com/usage/) for detailed instructions.
@@ -39,6 +73,7 @@ protected $listen = [
     ],
 ];
 ```
+</details>
 
 ### Usage
 

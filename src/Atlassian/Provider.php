@@ -18,23 +18,16 @@ class Provider extends AbstractProvider
         'audience' => 'api.atlassian.com',
     ];
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['read:me'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected $scopeSeparator = ' ';
+
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://auth.atlassian.com/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://auth.atlassian.com/oauth/token';
     }
@@ -58,22 +51,12 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['account_id'],
             'nickname' => $user['email'],
             'name'     => $user['name'],
             'email'    => $user['email'],
             'avatar'   => $user['picture'],
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

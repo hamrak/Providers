@@ -14,7 +14,7 @@ class MicrosoftUser extends User
      */
     public function getAvatar()
     {
-        $client = new Client();
+        $client = new Client;
 
         try {
             $response = $client->get(
@@ -27,8 +27,8 @@ class MicrosoftUser extends User
                 ]
             );
 
-            return (new MicrosoftAvatar())->setResponse($response);
-        } catch (ClientException $e) {
+            return (new MicrosoftAvatar)->setResponse($response);
+        } catch (ClientException) {
             return null;
         }
     }

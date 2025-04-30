@@ -10,23 +10,14 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'SAGE';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['full_access'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://www.sageone.com/oauth2/auth/central', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://oauth.accounting.sage.com/token';
     }
@@ -50,23 +41,13 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->map([
+        return (new User)->map([
             'id'            => $user['id'],
             'name'          => $user['first_name'].' '.$user['last_name'],
             'first_name'    => $user['first_name'],
             'last_name'     => $user['last_name'],
             'email'         => $user['email'],
             'locale'        => $user['locale'],
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

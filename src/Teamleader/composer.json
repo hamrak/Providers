@@ -11,7 +11,7 @@
     ],
     "authors": [
         {
-            "name": "13\u00b0",
+            "name": "13°",
             "email": "dev@13-grad.com"
         },
         {
@@ -25,9 +25,9 @@
         "docs": "https://socialiteproviders.com/teamleader"
     },
     "require": {
-        "php": "^7.4 || ^8.0",
+        "php": "^8.0",
         "ext-json": "*",
-        "socialiteproviders/manager": "~4.0"
+        "socialiteproviders/manager": "^4.4"
     },
     "autoload": {
         "psr-4": {

@@ -46,13 +46,13 @@ class Server extends BaseServer
     public function userDetails($data, TokenCredentials $tokenCredentials)
     {
         // If the API has broke, return nothing
-        if (!isset($data['response']['user']) || !is_array($data['response']['user'])) {
+        if (! isset($data['response']['user']) || ! is_array($data['response']['user'])) {
             return;
         }
 
         $data = $data['response']['user'];
 
-        $user = new User();
+        $user = new User;
 
         $user->nickname = $data['name'];
 
@@ -68,7 +68,7 @@ class Server extends BaseServer
      */
     public function userUid($data, TokenCredentials $tokenCredentials)
     {
-        if (!isset($data['response']['user']) || !is_array($data['response']['user'])) {
+        if (! isset($data['response']['user']) || ! is_array($data['response']['user'])) {
             return;
         }
 
@@ -80,16 +80,14 @@ class Server extends BaseServer
     /**
      * {@inheritdoc}
      */
-    public function userEmail($data, TokenCredentials $tokenCredentials)
-    {
-    }
+    public function userEmail($data, TokenCredentials $tokenCredentials) {}
 
     /**
      * {@inheritdoc}
      */
     public function userScreenName($data, TokenCredentials $tokenCredentials)
     {
-        if (!isset($data['response']['user']) || !is_array($data['response']['user'])) {
+        if (! isset($data['response']['user']) || ! is_array($data['response']['user'])) {
             return;
         }
 

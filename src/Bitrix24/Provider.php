@@ -12,23 +12,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'BITRIX24';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected $scopes = [''];
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['endpoint'];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase($this->getPortalUrl().'/oauth/authorize', $state);
     }
@@ -36,9 +25,9 @@ class Provider extends AbstractProvider
     /**
      * Get the portal URL.
      *
-     * @throws \InvalidArgumentException
-     *
      * @return string
+     *
+     * @throws \InvalidArgumentException
      */
     protected function getPortalUrl()
     {
@@ -51,10 +40,7 @@ class Provider extends AbstractProvider
         return $endpoint;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://oauth.bitrix.info/oauth/token/';
     }
@@ -62,11 +48,10 @@ class Provider extends AbstractProvider
     /**
      * Get the user by token.
      *
-     * @param string $token
+     * @param  string  $token
+     * @return array
      *
      * @throws \RuntimeException
-     *
-     * @return array
      */
     protected function getUserByToken($token)
     {
@@ -76,7 +61,7 @@ class Provider extends AbstractProvider
             ],
         ]);
 
-        $user = json_decode($response->getBody(), true);
+        $user = json_decode((string) $response->getBody(), true);
 
         if (isset($user['error'])) {
             throw new RuntimeException($user['error'].': '.$user['error_description'], 403);
@@ -90,7 +75,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'    => $user['ID'],
             'name'  => trim($user['NAME'].' '.$user['LAST_NAME']),
             'email' => $user['EMAIL'],

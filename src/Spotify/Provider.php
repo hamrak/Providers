@@ -11,28 +11,14 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'SPOTIFY';
 
-    /**
-     * The separating character for the requested scopes.
-     *
-     * @var string
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://accounts.spotify.com/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://accounts.spotify.com/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://accounts.spotify.com/api/token';
     }
@@ -60,23 +46,13 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'         => $user['id'],
             'nickname'   => null,
             'name'       => $user['display_name'],
             'email'      => $user['email'] ?? null,
             'avatar'     => Arr::get($user, 'images.0.url'),
             'profileUrl' => $user['href'] ?? null,
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

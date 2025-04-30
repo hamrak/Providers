@@ -59,7 +59,7 @@ class Server extends BaseServer
      */
     public function userDetails($data, TokenCredentials $tokenCredentials)
     {
-        $user = new User();
+        $user = new User;
         $user->id = $data['id'];
         $user->nickname = $data['nickname'];
         $user->name = $data['name'];
@@ -69,7 +69,7 @@ class Server extends BaseServer
         $used = ['id', 'nickname', 'name', 'email', 'avatar'];
 
         foreach ($data as $key => $value) {
-            if (!in_array($key, $used, true)) {
+            if (! in_array($key, $used, true)) {
                 $used[] = $key;
             }
         }

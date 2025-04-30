@@ -11,26 +11,14 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'MATTERMOST';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            $this->getInstanceUri().'oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase($this->getInstanceUri().'oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->getInstanceUri().'oauth/access_token';
     }
@@ -77,7 +65,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['id'],
             'nickname' => $user['nickname'],
             'name'     => $user['username'],
@@ -86,28 +74,17 @@ class Provider extends AbstractProvider
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return parent::getTokenFields($code) + ['grant_type' => 'authorization_code'];
-    }
-
     protected function getInstanceUri()
     {
-        $uri = $this->getConfig('instance_uri', null);
-        if (!$uri) {
+        $uri = $this->getConfig('instance_uri');
+        if (! $uri) {
             throw new InvalidArgumentException('No instance_uri. ENV['.self::IDENTIFIER.'_INSTANCE_URI]=https://mm.example.com/ must be provided.');
         }
 
         return $uri;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['api_version', 'instance_uri'];
     }

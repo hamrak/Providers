@@ -17,26 +17,14 @@ class Provider extends AbstractProvider
      */
     protected $fields = ['account_type', 'id', 'username'];
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['user_profile'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://api.instagram.com/oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://api.instagram.com/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.instagram.com/oauth/access_token';
     }
@@ -46,16 +34,20 @@ class Provider extends AbstractProvider
      */
     protected function getUserByToken($token)
     {
-        $meUrl = 'https://graph.instagram.com/me?access_token='.$token.'&fields='.implode(',', $this->fields);
+        $queryParameters = [
+            'access_token' => $token,
+            'fields'       => implode(',', $this->fields),
+        ];
 
-        if (!empty($this->clientSecret)) {
-            $appSecretProof = hash_hmac('sha256', $token, $this->clientSecret);
-            $meUrl .= '&appsecret_proof='.$appSecretProof;
+        if (! empty($this->clientSecret)) {
+            $queryParameters['appsecret_proof'] = hash_hmac('sha256', $token, $this->clientSecret);
         }
-        $response = $this->getHttpClient()->get($meUrl, [
+
+        $response = $this->getHttpClient()->get('https://graph.instagram.com/me', [
             RequestOptions::HEADERS => [
                 'Accept' => 'application/json',
             ],
+            RequestOptions::QUERY => $queryParameters,
         ]);
 
         return json_decode((string) $response->getBody(), true);
@@ -66,7 +58,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'           => $user['id'],
             'nickname'     => $user['username'],
             'name'         => null,
@@ -82,13 +74,11 @@ class Provider extends AbstractProvider
      */
     protected function getCodeFields($state = null)
     {
-        return [
-            'state'         => $state,
-            'response_type' => 'code',
-            'app_id'        => $this->clientId,
-            'redirect_uri'  => $this->redirectUrl,
-            'scope'         => $this->formatScopes($this->scopes, $this->scopeSeparator),
-        ];
+        $fields = parent::getCodeFields($state);
+        $fields['app_id'] = $fields['client_id'];
+        unset($fields['client_id']);
+
+        return $fields;
     }
 
     public function getAccessToken($code)

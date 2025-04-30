@@ -11,33 +11,18 @@ use SocialiteProviders\Manager\OAuth2\User;
  */
 class Provider extends AbstractProvider
 {
-    /**
-     * Unique Provider Identifier.
-     */
-    const IDENTIFIER = 'SUBSCRIBESTAR';
+    public const IDENTIFIER = 'SUBSCRIBESTAR';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['user.read', 'user.email.read', 'subscriber.read'];
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://www.subscribestar.com/oauth2/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://www.subscribestar.com/oauth2/token';
     }
@@ -47,26 +32,15 @@ class Provider extends AbstractProvider
      */
     protected function getUserByToken($token)
     {
-        $query = '{
-            user {
-                id
-                email
-                name
-                avatar_url
-            }
-        }
-        ';
-
-        $response = $this->getHttpClient()->post(
-            'https://www.subscribestar.com/api/graphql/v1',
-            [
-                RequestOptions::HEADERS => [
-                    'Accept'        => 'application/json',
-                    'Authorization' => 'Bearer '.$token,
-                ],
-                RequestOptions::FORM_PARAMS => ['query' => $query],
-            ]
-        );
+        $response = $this->getHttpClient()->post('https://www.subscribestar.com/api/graphql/v1', [
+            RequestOptions::HEADERS => [
+                'Accept'        => 'application/json',
+                'Authorization' => 'Bearer '.$token,
+            ],
+            RequestOptions::FORM_PARAMS => [
+                'query' => '{ user { id email name avatar_url } }',
+            ],
+        ]);
 
         return json_decode((string) $response->getBody(), true);
     }
@@ -76,7 +50,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['data']['user']['id'],
             'name'     => $user['data']['user']['name'] ?? null,
             'email'    => $user['data']['user']['email'] ?? null,

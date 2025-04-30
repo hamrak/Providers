@@ -12,18 +12,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'UCL';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://uclapi.com/oauth/authorise/', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://uclapi.com/oauth/token';
     }
@@ -33,8 +27,8 @@ class Provider extends AbstractProvider
      */
     public function user()
     {
-        if ($this->hasInvalidState() || !$this->getCode()) {
-            throw new InvalidStateException();
+        if ($this->hasInvalidState() || ! $this->getCode()) {
+            throw new InvalidStateException;
         }
         $response = $this->getAccessTokenResponse($this->getCode());
         $user = $this->mapUserToObject($this->getUserByToken(
@@ -45,11 +39,7 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * Get the POST fields for the token request.
-     *
-     * @param string $code
-     *
-     * @return array
+     * {@inheritdoc}
      */
     protected function getTokenFields($code)
     {
@@ -78,7 +68,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => Arr::get($user, 'upi'),
             'name'     => Arr::get($user, 'full_name'),
             'nickname' => Arr::get($user, 'given_name'),

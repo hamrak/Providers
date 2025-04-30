@@ -13,28 +13,14 @@ class Provider extends AbstractProvider
 
     public const PROVIDER_NAME = 'salesforce';
 
-    /**
-     * The separating character for the requested scopes.
-     *
-     * @var string
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            $this->getInstanceURL().'/services/oauth2/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase($this->getInstanceURL().'/services/oauth2/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->getInstanceURL().'/services/oauth2/token';
     }
@@ -62,22 +48,12 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => Arr::get($user, 'user_id'),
             'name'     => Arr::get($user, 'name'),
             'email'    => Arr::get($user, 'email'),
             'avatar'   => Arr::get($user, 'picture'),
             'nickname' => Arr::get($user, 'nickname'),
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 
@@ -92,10 +68,7 @@ class Provider extends AbstractProvider
         return $this->getConfig('instance_url', 'https://login.salesforce.com');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['instance_url'];
     }

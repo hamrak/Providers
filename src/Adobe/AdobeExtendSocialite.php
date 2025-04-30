@@ -6,13 +6,8 @@ use SocialiteProviders\Manager\SocialiteWasCalled;
 
 class AdobeExtendSocialite
 {
-    /**
-     * Register the provider.
-     *
-     * @param SocialiteWasCalled $event
-     */
-    public function handle(SocialiteWasCalled $event)
+    public function handle(SocialiteWasCalled $socialiteWasCalled): void
     {
-        $event->extendSocialite('adobe', Provider::class);
+        $socialiteWasCalled->extendSocialite('adobe', Provider::class);
     }
 }

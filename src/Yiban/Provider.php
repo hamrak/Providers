@@ -15,15 +15,12 @@ class Provider extends AbstractProvider
      */
     protected $openId;
 
-    /**
-     * {@inheritdoc}.
-     */
     protected $scopes = ['snsapi_userinfo'];
 
     /**
      * set Open Id.
      *
-     * @param string $openId
+     * @param  string  $openId
      */
     public function setOpenId($openId)
     {
@@ -51,18 +48,12 @@ class Provider extends AbstractProvider
         return 'https://openapi.yiban.cn/oauth/revoke_token';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://openapi.yiban.cn/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://openapi.yiban.cn/oauth/access_token';
     }
@@ -72,11 +63,14 @@ class Provider extends AbstractProvider
      */
     protected function getUserByToken($token)
     {
-        $userUrl = 'https://openapi.yiban.cn/user/real_me?access_token='.$token;
-        $response = $this->getHttpClient()->get(
-            $userUrl,
-            $this->getRequestOptions()
-        );
+        $response = $this->getHttpClient()->get('https://openapi.yiban.cn/user/real_me', [
+            RequestOptions::HEADERS => [
+                'Accept' => 'application/json',
+            ],
+            RequestOptions::QUERY => [
+                'access_token' => $token,
+            ],
+        ]);
 
         return json_decode((string) $response->getBody(), true);
     }
@@ -86,7 +80,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'        => $user['info']['yb_userid'],
             'name'      => $user['info']['yb_username'],
             'sex'       => $user['info']['yb_sex'],
@@ -94,19 +88,5 @@ class Provider extends AbstractProvider
             'schoolId'  => $user['info']['yb_schoolid'],
             'studentId' => $user['info']['yb_studentid'],
         ]);
-    }
-
-    /**
-     * Get the default options for an HTTP request.
-     *
-     * @return array
-     */
-    protected function getRequestOptions()
-    {
-        return [
-            RequestOptions::HEADERS => [
-                'Accept' => 'application/json',
-            ],
-        ];
     }
 }

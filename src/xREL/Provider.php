@@ -10,18 +10,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'XREL';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://api.xrel.to/v2/oauth2/auth', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.xrel.to/v2/oauth2/token';
     }
@@ -46,22 +40,12 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['id'],
             'nickname' => $user['name'],
             'name'     => $user['name'],
             'email'    => null,
             'avatar'   => null,
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

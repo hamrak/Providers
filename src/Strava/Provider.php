@@ -10,21 +10,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'STRAVA';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://www.strava.com/oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://www.strava.com/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://www.strava.com/oauth/token';
     }
@@ -51,22 +42,12 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['id'],
             'nickname' => null,
             'name'     => $user['firstname'].' '.$user['lastname'],
             'email'    => null,
             'avatar'   => $user['profile_medium'],
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 

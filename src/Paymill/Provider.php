@@ -9,26 +9,14 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'PAYMILL';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['transactions_rw'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://connect.paymill.com/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://connect.paymill.com/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://connect.paymill.com/token';
     }
@@ -46,16 +34,6 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
-        ]);
+        return (new User)->setRaw($user);
     }
 }

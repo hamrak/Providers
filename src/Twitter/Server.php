@@ -46,7 +46,7 @@ class Server extends BaseServer
      */
     public function userDetails($data, TokenCredentials $tokenCredentials)
     {
-        $user = new User();
+        $user = new User;
         $user->id = $data['id'];
         $user->nickname = $data['screen_name'];
         $user->name = $data['name'];
@@ -61,16 +61,21 @@ class Server extends BaseServer
 
         $used = ['id', 'screen_name', 'name', 'location', 'description', 'profile_image_url_https', 'email'];
 
-        $user->urls = [];
-        foreach ($data as $key => $value) {
-            if (strpos($key, 'url') !== false) {
-                if (!in_array($key, $used, true)) {
-                    $used[] = $key;
-                }
+        $urls = [];
 
-                $user->urls[$key] = $value;
+        if (isset($data) and ! empty($data)) {
+            foreach ($data as $key => $value) {
+                if (str_contains($key, 'url')) {
+                    if (! in_array($key, $used, true)) {
+                        $used[] = $key;
+                    }
+
+                    $urls[$key] = $value;
+                }
             }
         }
+
+        $user->urls = $urls;
 
         $user->extra = array_diff_key($data, array_flip($used));
 
@@ -88,9 +93,7 @@ class Server extends BaseServer
     /**
      * {@inheritdoc}
      */
-    public function userEmail($data, TokenCredentials $tokenCredentials)
-    {
-    }
+    public function userEmail($data, TokenCredentials $tokenCredentials) {}
 
     /**
      * {@inheritdoc}

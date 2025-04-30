@@ -11,21 +11,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'UNTAPPD';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://untappd.com/oauth/authenticate/',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://untappd.com/oauth/authenticate/', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://untappd.com/oauth/authorize/';
     }
@@ -35,14 +26,14 @@ class Provider extends AbstractProvider
      */
     protected function getUserByToken($token)
     {
-        $response = $this->getHttpClient()->get(
-            'https://api.untappd.com/v4/user/info?access_token='.$token,
-            [
-                RequestOptions::HEADERS => [
-                    'Authorization' => 'Bearer '.$token,
-                ],
-            ]
-        );
+        $response = $this->getHttpClient()->get('https://api.untappd.com/v4/user/info', [
+            RequestOptions::HEADERS => [
+                'Authorization' => 'Bearer '.$token,
+            ],
+            RequestOptions::QUERY => [
+                'access_token' => $token,
+            ],
+        ]);
 
         return Arr::get(json_decode((string) $response->getBody(), true), 'response.user');
     }
@@ -52,7 +43,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'              => $user['id'],
             'nickname'        => $user['user_name'],
             'name'            => Arr::get($user, 'first_name').' '.Arr::get($user, 'last_name'),
@@ -75,8 +66,7 @@ class Provider extends AbstractProvider
     /**
      * Get the access token response for the given code.
      *
-     * @param string $code
-     *
+     * @param  string  $code
      * @return array
      */
     public function getAccessTokenResponse($code)

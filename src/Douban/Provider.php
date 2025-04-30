@@ -10,18 +10,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'DOUBAN';
 
-    /**
-     * {@inheritdoc}.
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://www.douban.com/service/auth2/auth', $state);
     }
 
-    /**
-     * {@inheritdoc}.
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://www.douban.com/service/auth2/token';
     }
@@ -45,19 +39,9 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'     => $user['id'], 'nickname' => $user['name'],
             'avatar' => $user['large_avatar'], 'name' => null, 'email' => null,
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}.
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 
@@ -73,13 +57,12 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * @param mixed $response
-     *
+     * @param  mixed  $response
      * @return string
      */
     protected function removeCallback($response)
     {
-        if (strpos($response, 'callback') !== false) {
+        if (str_contains($response, 'callback')) {
             $lpos = strpos($response, '(');
             $rpos = strrpos($response, ')');
             $response = substr($response, $lpos + 1, $rpos - $lpos - 1);

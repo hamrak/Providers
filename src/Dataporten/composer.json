@@ -11,7 +11,7 @@
     ],
     "authors": [
         {
-            "name": "J\u00f8rgen Birkhaug",
+            "name": "Jørgen Birkhaug",
             "email": "jorgen.birkhaug@uib.no"
         }
     ],
@@ -21,9 +21,9 @@
         "docs": "https://socialiteproviders.com/dataporten"
     },
     "require": {
-        "php": "^7.4 || ^8.0",
+        "php": "^8.0",
         "ext-json": "*",
-        "socialiteproviders/manager": "~4.0"
+        "socialiteproviders/manager": "^4.4"
     },
     "autoload": {
         "psr-4": {

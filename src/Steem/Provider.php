@@ -11,9 +11,6 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'STEEM';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['login'];
 
     /**
@@ -21,18 +18,12 @@ class Provider extends AbstractProvider
      */
     protected $domain = 'https://v2.steemconnect.com/';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase($this->domain.'oauth2/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->domain.'api/oauth2/token';
     }
@@ -72,7 +63,7 @@ class Provider extends AbstractProvider
     {
         $metadata = json_decode($user['account']['json_metadata'], true);
 
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'          => $user['user'],
             'nickname'    => $user['user'],
             'name'        => Arr::get($metadata, 'profile.name', $user['user']),
@@ -80,16 +71,6 @@ class Provider extends AbstractProvider
             'location'    => Arr::get($metadata, 'profile.location'),
             'avatar'      => Arr::get($metadata, 'profile.profile_image'),
             'cover_image' => Arr::get($metadata, 'profile.cover_image'),
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

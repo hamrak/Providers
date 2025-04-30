@@ -10,23 +10,14 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'IFSP';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['read'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://suap.ifsp.edu.br/o/authorize/', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://suap.ifsp.edu.br/o/token/';
     }
@@ -52,22 +43,12 @@ class Provider extends AbstractProvider
     {
         $name = $user['name'] ?? $user['username'];
 
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['id'],
             'nickname' => $user['first_name'].' '.$user['last_name'],
             'name'     => $name,
             'email'    => $user['email'],
             'avatar'   => null,
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

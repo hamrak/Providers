@@ -11,21 +11,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'MEDIACUBE';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://mediacube.id/oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://mediacube.id/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://mediacube.id/oauth/token';
     }
@@ -33,8 +24,7 @@ class Provider extends AbstractProvider
     /**
      * Get the raw user for the given access token.
      *
-     * @param string $token
-     *
+     * @param  string  $token
      * @return array
      */
     protected function getUserByToken($token)
@@ -61,20 +51,9 @@ class Provider extends AbstractProvider
         ];
     }
 
-    protected function getTokenFields($code)
-    {
-        return [
-            'client_id'     => $this->clientId,
-            'client_secret' => $this->clientSecret,
-            'code'          => $code,
-            'redirect_uri'  => $this->redirectUrl,
-            'grant_type'    => 'authorization_code',
-        ];
-    }
-
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map($user);
+        return (new User)->setRaw($user)->map($user);
     }
 
     /**

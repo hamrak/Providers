@@ -11,45 +11,20 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'LINE';
 
-    /**
-     * The separating character for the requested scopes.
-     *
-     * @var string
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * The scopes being requested.
-     *
-     * @var array
-     */
     protected $scopes = [
         'openid',
         'profile',
         'email',
     ];
 
-    /**
-     * Get the authentication URL for the provider.
-     *
-     * @param string $state
-     *
-     * @return string
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://access.line.me/oauth2/v2.1/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://access.line.me/oauth2/v2.1/authorize', $state);
     }
 
-    /**
-     * Get the token URL for the provider.
-     *
-     * @return string
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.line.me/oauth2/v2.1/token';
     }
@@ -57,8 +32,7 @@ class Provider extends AbstractProvider
     /**
      * Get the raw user for the given access token.
      *
-     * @param string $token
-     *
+     * @param  string  $token
      * @return array
      */
     protected function getUserByToken($token)
@@ -78,13 +52,12 @@ class Provider extends AbstractProvider
     /**
      * Map the raw user array to a Socialite User instance.
      *
-     * @param array $user
-     *
+     * @param  array  $user
      * @return \Laravel\Socialite\User
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['userId'] ?? $user['sub'] ?? null,
             'nickname' => null,
             'name'     => $user['displayName'] ?? $user['name'] ?? null,
@@ -94,26 +67,12 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * Get the POST fields for the token request.
-     *
-     * @param string $code
-     *
-     * @return array
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
-        ]);
-    }
-
-    /**
      * @return \SocialiteProviders\Manager\OAuth2\User
      */
     public function user()
     {
         if ($this->hasInvalidState()) {
-            throw new InvalidStateException();
+            throw new InvalidStateException;
         }
 
         $response = $this->getAccessTokenResponse($this->getCode());
@@ -134,7 +93,31 @@ class Provider extends AbstractProvider
         }
 
         return $user->setToken($this->parseAccessToken($response))
-                    ->setRefreshToken($this->parseRefreshToken($response))
-                    ->setExpiresIn($this->parseExpiresIn($response));
+            ->setRefreshToken($this->parseRefreshToken($response))
+            ->setExpiresIn($this->parseExpiresIn($response));
+    }
+
+    public static function additionalConfigKeys(): array
+    {
+        return [
+            'bot_prompt',
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function getCodeFields($state = null)
+    {
+        $fields = parent::getCodeFields($state);
+
+        $botPrompt = $this->getConfig('bot_prompt');
+        if (! empty($botPrompt)) {
+            $fields['bot_prompt'] = $botPrompt;
+        }
+
+        return $fields;
     }
 }

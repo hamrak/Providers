@@ -11,26 +11,14 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'YANDEX';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://oauth.yandex.ru/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://oauth.yandex.ru/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://oauth.yandex.ru/token';
     }
@@ -40,14 +28,14 @@ class Provider extends AbstractProvider
      */
     protected function getUserByToken($token)
     {
-        $response = $this->getHttpClient()->get(
-            'https://login.yandex.ru/info?format=json',
-            [
-                RequestOptions::HEADERS => [
-                    'Authorization' => 'Bearer '.$token,
-                ],
-            ]
-        );
+        $response = $this->getHttpClient()->get('https://login.yandex.ru/info', [
+            RequestOptions::HEADERS => [
+                'Authorization' => 'Bearer '.$token,
+            ],
+            RequestOptions::QUERY => [
+                'format' => 'json',
+            ],
+        ]);
 
         return json_decode((string) $response->getBody(), true);
     }
@@ -57,22 +45,12 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['id'],
             'nickname' => $user['login'],
             'name'     => Arr::get($user, 'real_name'),
             'email'    => Arr::get($user, 'default_email'),
             'avatar'   => 'https://avatars.yandex.net/get-yapic/'.Arr::get($user, 'default_avatar_id').'/islands-200',
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

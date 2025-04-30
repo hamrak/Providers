@@ -11,30 +11,16 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'GITEE';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['user_info', 'emails'];
 
-    /**
-     * The separating character for the requested scopes.
-     *
-     * @var string
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://gitee.com/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://gitee.com/oauth/token';
     }
@@ -58,8 +44,7 @@ class Provider extends AbstractProvider
     /**
      * Get the email for the given access token.
      *
-     * @param string $token
-     *
+     * @param  string  $token
      * @return string|null
      */
     protected function getEmailByToken($token)
@@ -71,7 +56,7 @@ class Provider extends AbstractProvider
                 $emailsUrl,
                 $this->getRequestOptions($token)
             );
-        } catch (Exception $e) {
+        } catch (Exception) {
             return null;
         }
 
@@ -87,7 +72,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['id'],
             'nickname' => $user['name'],
             'name'     => $user['login'],
@@ -97,20 +82,9 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
-        ]);
-    }
-
-    /**
      * Get the default options for an HTTP request.
      *
-     * @param string $token
-     *
+     * @param  string  $token
      * @return array
      */
     protected function getRequestOptions($token)

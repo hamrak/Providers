@@ -10,18 +10,10 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'LICHESS';
 
-    /**
-     * The scopes being requested.
-     *
-     * @var array
-     */
     protected $scopes = [
         'email:read',
     ];
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopeSeparator = ' ';
 
     /**
@@ -29,18 +21,12 @@ class Provider extends AbstractProvider
      */
     protected $usesPKCE = true;
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://lichess.org/oauth', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://lichess.org/api/token';
     }
@@ -48,8 +34,7 @@ class Provider extends AbstractProvider
     /**
      * Get profile of the logged in user.
      *
-     * @param string $token
-     *
+     * @param  string  $token
      * @return array $user
      */
     protected function getUserByToken($token)
@@ -71,8 +56,7 @@ class Provider extends AbstractProvider
     /**
      * Get the default options for an HTTP request.
      *
-     * @param string $token
-     *
+     * @param  string  $token
      * @return array
      */
     protected function getRequestOptions($token)
@@ -87,8 +71,7 @@ class Provider extends AbstractProvider
     /**
      * Get the email address for the user.
      *
-     * @param string $token
-     *
+     * @param  string  $token
      * @return string
      */
     protected function getEmailByToken($token)
@@ -106,7 +89,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['id'],
             'username' => $user['username'],
             'email'    => $user['email'],

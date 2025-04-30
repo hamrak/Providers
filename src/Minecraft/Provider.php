@@ -10,6 +10,8 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'MINECRAFT';
 
+    protected $stateless = true;
+
     /**
      * Used to get a token from XBOX Live.
      */
@@ -25,38 +27,18 @@ class Provider extends AbstractProvider
      */
     protected const XSTS_TOKEN_URL = 'https://xsts.auth.xboxlive.com/xsts/authorize';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['XboxLive.signin'];
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://login.live.com/oauth20_authorize.srf', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.minecraftservices.com/authentication/login_with_xbox';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function isStateless()
-    {
-        return true;
     }
 
     /**
@@ -85,7 +67,7 @@ class Provider extends AbstractProvider
 
         $avatar = count($activeSkin) === 1 ? $activeSkin[0]['url'] : null;
 
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['id'],
             'uuid'     => $uuid,
             'nickname' => null,
@@ -129,8 +111,7 @@ class Provider extends AbstractProvider
     /**
      * Get Microsoft Token for sign in.
      *
-     * @param string $code
-     *
+     * @param  string  $code
      * @return array
      */
     protected function getMicrosoftToken($code)
@@ -159,8 +140,7 @@ class Provider extends AbstractProvider
     /**
      * Get a XBOX Live login token.
      *
-     * @param array $xboxToken
-     *
+     * @param  array  $xboxToken
      * @return array
      */
     protected function signInIntoXboxLive($xboxToken)
@@ -192,8 +172,7 @@ class Provider extends AbstractProvider
     /**
      * Get a XSTS token.
      *
-     * @param array $loginToken
-     *
+     * @param  array  $loginToken
      * @return array
      */
     protected function getXstsToken($loginToken)

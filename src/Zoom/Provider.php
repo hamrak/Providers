@@ -13,26 +13,14 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'ZOOM';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['user:read:admin'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://zoom.us/oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://zoom.us/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://zoom.us/oauth/token';
     }
@@ -59,7 +47,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['id'],
             'nickname' => $user['first_name'].' '.$user['last_name'],
             'name'     => $user['first_name'].' '.$user['last_name'],
@@ -90,8 +78,6 @@ class Provider extends AbstractProvider
 
         unset($fields['client_id'], $fields['client_secret']);
 
-        return array_merge($fields, [
-            'grant_type' => 'authorization_code',
-        ]);
+        return $fields;
     }
 }

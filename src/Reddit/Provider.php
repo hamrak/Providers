@@ -10,26 +10,14 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'REDDIT';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['identity'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://ssl.reddit.com/api/v1/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://ssl.reddit.com/api/v1/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://ssl.reddit.com/api/v1/access_token';
     }
@@ -58,7 +46,7 @@ class Provider extends AbstractProvider
     protected function mapUserToObject(array $user)
     {
         $avatar = null;
-        if (!empty($user['icon_img'])) {
+        if (! empty($user['icon_img'])) {
             $avatar = $user['icon_img'];
 
             // Strip the query segment of the URL if it exists.
@@ -70,11 +58,11 @@ class Provider extends AbstractProvider
 
         $name = null;
         //Check if user has a display name
-        if (!empty($user['subreddit']['title'])) {
+        if (! empty($user['subreddit']['title'])) {
             $name = $user['subreddit']['title'];
         }
 
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'   => $user['id'], 'nickname' => $user['name'],
             'name' => $name, 'email' => null, 'avatar' => $avatar,
         ]);
@@ -105,7 +93,8 @@ class Provider extends AbstractProvider
     protected function getTokenFields($code)
     {
         return [
-            'grant_type'   => 'authorization_code', 'code' => $code,
+            'grant_type'   => 'authorization_code',
+            'code'         => $code,
             'redirect_uri' => $this->redirectUrl,
         ];
     }
@@ -119,10 +108,7 @@ class Provider extends AbstractProvider
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['platform', 'app_id', 'version_string'];
     }

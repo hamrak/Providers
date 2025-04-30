@@ -16,25 +16,19 @@ class Provider extends AbstractProvider
      */
     protected $openId;
 
-    /**
-     * {@inheritdoc}.
-     */
     protected $scopes = ['snsapi_login'];
 
     /**
      * set Open Id.
      *
-     * @param string $openId
+     * @param  string  $openId
      */
     public function setOpenId($openId)
     {
         $this->openId = $openId;
     }
 
-    /**
-     * {@inheritdoc}.
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         //return $this->buildAuthUrlFromBase('https://open.weixin.qq.com/connect/qrconnect', $state);
         return $this->buildAuthUrlFromBase($this->getConfig(
@@ -66,10 +60,7 @@ class Provider extends AbstractProvider
         ];
     }
 
-    /**
-     * {@inheritdoc}.
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.weixin.qq.com/sns/oauth2/access_token';
     }
@@ -95,7 +86,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => Arr::get($user, 'openid'),
             'unionid'  => Arr::get($user, 'unionid'),
             'nickname' => $user['nickname'],
@@ -110,8 +101,10 @@ class Provider extends AbstractProvider
     protected function getTokenFields($code)
     {
         return [
-            'appid' => $this->clientId, 'secret' => $this->clientSecret,
-            'code'  => $code, 'grant_type' => 'authorization_code',
+            'appid'      => $this->clientId,
+            'code'       => $code,
+            'grant_type' => 'authorization_code',
+            'secret'     => $this->clientSecret,
         ];
     }
 
@@ -131,10 +124,7 @@ class Provider extends AbstractProvider
         return $this->credentialsResponseBody;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['auth_base_uri'];
     }

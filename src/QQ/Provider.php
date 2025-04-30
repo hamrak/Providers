@@ -29,36 +29,20 @@ class Provider extends AbstractProvider
      */
     protected $withUnionId = false;
 
-    /**
-     * The scopes being requested.
-     *
-     * @var array
-     */
     protected $scopes = ['get_user_info'];
 
-    /**
-     * {@inheritdoc}.
-     *
-     * @see \Laravel\Socialite\Two\AbstractProvider::getAuthUrl()
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://graph.qq.com/oauth2.0/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}.
-     *
-     * @see \Laravel\Socialite\Two\AbstractProvider::getTokenUrl()
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://graph.qq.com/oauth2.0/token';
     }
 
     /**
-     * @param bool $value
-     *
+     * @param  bool  $value
      * @return self
      */
     public function withUnionId($value = true)
@@ -75,18 +59,31 @@ class Provider extends AbstractProvider
      */
     protected function getUserByToken($token)
     {
-        $url = 'https://graph.qq.com/oauth2.0/me?fmt=json&access_token='.$token;
-        $this->withUnionId && $url .= '&unionid=1';
+        $queryParams = [
+            'fmt'          => 'json',
+            'access_token' => $token,
+        ];
 
-        $response = $this->getHttpClient()->get($url);
+        if ($this->withUnionId) {
+            $queryParams['unionid'] = 1;
+        }
+
+        $response = $this->getHttpClient()->get('https://graph.qq.com/oauth2.0/me', [
+            RequestOptions::QUERY => $queryParams,
+        ]);
 
         $me = json_decode((string) $response->getBody(), true);
+
         $this->openId = $me['openid'];
         $this->unionId = $me['unionid'] ?? '';
 
-        $response = $this->getHttpClient()->get(
-            "https://graph.qq.com/user/get_user_info?access_token=$token&openid={$this->openId}&oauth_consumer_key={$this->clientId}"
-        );
+        $response = $this->getHttpClient()->get('https://graph.qq.com/user/get_user_info', [
+            RequestOptions::QUERY => [
+                'access_token'       => $token,
+                'openid'             => $this->openId,
+                'oauth_consumer_key' => $this->clientId,
+            ],
+        ]);
 
         return json_decode((string) $response->getBody(), true);
     }
@@ -98,7 +95,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'   => $this->openId, 'unionid' => $this->unionId, 'nickname' => $user['nickname'],
             'name' => null, 'email' => null, 'avatar' => $user['figureurl_qq_2'],
         ]);
@@ -106,14 +103,11 @@ class Provider extends AbstractProvider
 
     /**
      * {@inheritdoc}.
-     *
-     * @see \Laravel\Socialite\Two\AbstractProvider::getTokenFields()
      */
     protected function getTokenFields($code)
     {
         return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
-            'fmt'        => 'json',
+            'fmt' => 'json',
         ]);
     }
 

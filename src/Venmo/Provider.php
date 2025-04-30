@@ -10,26 +10,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'VENMO';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected $scopes = [''];
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://api.venmo.com/v1/oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://api.venmo.com/v1/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.venmo.com/v1/oauth/access_token';
     }
@@ -57,26 +43,13 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map(
+        return (new User)->setRaw($user)->map(
             [
                 'id'       => $user['data']['user']['id'],
                 'nickname' => $user['data']['user']['username'],
                 'name'     => $user['data']['user']['display_name'],
                 'email'    => $user['data']['user']['email'],
                 'avatar'   => $user['data']['user']['profile_picture_url'],
-            ]
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(
-            parent::getTokenFields($code),
-            [
-                'grant_type' => 'authorization_code',
             ]
         );
     }

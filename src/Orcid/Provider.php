@@ -32,28 +32,11 @@ class Provider extends AbstractProvider
      */
     public const productionProfileURL = 'https://pub.orcid.org/v2.1/';
 
-    /**
-     * The scopes being requested.
-     * Others include: '/activities/update','/person/update'.
-     *
-     * You can customise the scopes when invoking the ORCID Socialite provider
-     * if this needs to change
-     *
-     * @var array
-     */
     protected $scopes = ['/authenticate', '/read-limited'];
 
-    /**
-     * The separating character for the requested scopes.
-     *
-     * @var string
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return [
             'environment',
@@ -69,7 +52,7 @@ class Provider extends AbstractProvider
      */
     protected function useSandbox()
     {
-        return  $this->getConfig('environment') !== 'production';
+        return $this->getConfig('environment') !== 'production';
     }
 
     /**
@@ -92,18 +75,12 @@ class Provider extends AbstractProvider
         return ($this->useSandbox() ? self::sandboxProfileURL : self::productionProfileURL).$path;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase($this->baseUrl('oauth/authorize'), $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->baseUrl('oauth/token');
     }
@@ -116,7 +93,7 @@ class Provider extends AbstractProvider
     public function user()
     {
         if ($this->hasInvalidState()) {
-            throw new InvalidStateException();
+            throw new InvalidStateException;
         }
 
         $response = $this->getAccessTokenResponse($this->getCode());
@@ -128,8 +105,8 @@ class Provider extends AbstractProvider
         $token = Arr::get($response, 'access_token');
 
         return $user->setToken($token)
-                    ->setRefreshToken(Arr::get($response, 'refresh_token'))
-                    ->setExpiresIn(Arr::get($response, 'expires_in'));
+            ->setRefreshToken(Arr::get($response, 'refresh_token'))
+            ->setExpiresIn(Arr::get($response, 'expires_in'));
     }
 
     /**
@@ -163,8 +140,7 @@ class Provider extends AbstractProvider
      * If your app design relies on fetching the user email from ORCID, you should consider checking
      * that it exists in your LoginController logic.
      *
-     * @param string $token
-     *
+     * @param  string  $token
      * @return string|null
      */
     protected function getEmail($user)
@@ -181,10 +157,13 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        $given_name = $user['person']['name']['given-names']['value'] ?? '';
+        $family_name = $user['person']['name']['family-name']['value'] ?? '';
+
+        return (new User)->setRaw($user)->map([
             $this->getConfig('uid_fieldname', 'id') => $user['orcid-identifier']['path'],
-            'nickname'                              => $user['person']['name']['given-names']['value'],
-            'name'                                  => sprintf('%s %s', $user['person']['name']['given-names']['value'], $user['person']['name']['family-name']['value']),
+            'nickname'                              => $given_name,
+            'name'                                  => sprintf('%s %s', $given_name, $family_name),
             'email'                                 => Arr::get($user, 'email'),
         ]);
     }
@@ -192,8 +171,7 @@ class Provider extends AbstractProvider
     /**
      * Get the access token for the given code.
      *
-     * @param string $code
-     *
+     * @param  string  $code
      * @return string
      */
     public function getAccessToken($code)
@@ -210,14 +188,12 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * Get the POST fields for the token request.
-     *
-     * @param string $code
-     *
-     * @return array
+     * {@inheritdoc}
      */
     protected function getTokenFields($code)
     {
-        return parent::getTokenFields($code) + ['grant_type' => 'authorization_code', 'orcid' => 'orcid'];
+        return array_merge(parent::getTokenFields($code), [
+            'orcid' => 'orcid',
+        ]);
     }
 }

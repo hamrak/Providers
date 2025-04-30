@@ -10,23 +10,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'TRAKT';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected $scopes = [''];
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://api.trakt.tv/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.trakt.tv/oauth/token';
     }
@@ -36,11 +25,14 @@ class Provider extends AbstractProvider
      */
     protected function getUserByToken($token)
     {
-        $response = $this->getHttpClient()->get('https://api.trakt.tv/users/me?extended=full', [
+        $response = $this->getHttpClient()->get('https://api.trakt.tv/users/me', [
             RequestOptions::HEADERS => [
                 'Authorization'     => 'Bearer '.$token,
                 'trakt-api-version' => $this->getConfig('api_version', '2'),
                 'trakt-api-key'     => $this->clientId,
+            ],
+            RequestOptions::QUERY => [
+                'extended' => 'full',
             ],
         ]);
 
@@ -52,26 +44,13 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'nickname' => $user['username'],
             'name'     => $user['name'],
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['api_version'];
     }

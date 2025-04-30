@@ -2,6 +2,7 @@
 
 namespace SocialiteProviders\GovBR;
 
+use GuzzleHttp\RequestOptions;
 use RuntimeException;
 use SocialiteProviders\Manager\Contracts\OAuth2\ProviderInterface;
 use SocialiteProviders\Manager\OAuth2\AbstractProvider;
@@ -9,20 +10,17 @@ use SocialiteProviders\Manager\OAuth2\User;
 
 class Provider extends AbstractProvider implements ProviderInterface
 {
-    /**
-     * Unique Provider Identifier.
-     */
-    const IDENTIFIER = 'GOVBR';
+    public const IDENTIFIER = 'GOVBR';
 
-    const SCOPE_OPENID = 'openid';
+    public const SCOPE_OPENID = 'openid';
 
-    const SCOPE_EMAIL = 'email';
+    public const SCOPE_EMAIL = 'email';
 
-    const SCOPE_PROFILE = 'profile';
+    public const SCOPE_PROFILE = 'profile';
 
-    const SCOPE_GOVBR_EMPRESA = 'govbr_empresa';
+    public const SCOPE_GOVBR_EMPRESA = 'govbr_empresa';
 
-    const SCOPE_GOVBR_CONFIABILIDADES = 'govbr_confiabilidades';
+    public const SCOPE_GOVBR_CONFIABILIDADES = 'govbr_confiabilidades';
 
     /**
      * Staging URL.
@@ -38,14 +36,8 @@ class Provider extends AbstractProvider implements ProviderInterface
      */
     protected $productionUrl = 'https://sso.acesso.gov.br';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = [
         self::SCOPE_OPENID,
         self::SCOPE_EMAIL,
@@ -58,18 +50,12 @@ class Provider extends AbstractProvider implements ProviderInterface
      */
     protected $usesPKCE = true;
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase($this->getBaseUrlForEnvironment().'/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->getBaseUrlForEnvironment().'/token';
     }
@@ -80,12 +66,12 @@ class Provider extends AbstractProvider implements ProviderInterface
     protected function getUserByToken($token)
     {
         $response = $this->getHttpClient()->get($this->getBaseUrlForEnvironment().'/userinfo', [
-            'headers' => [
+            RequestOptions::HEADERS => [
                 'Authorization' => 'Bearer '.$token,
             ],
         ]);
 
-        return json_decode($response->getBody(), true);
+        return json_decode((string) $response->getBody(), true);
     }
 
     /**
@@ -93,7 +79,7 @@ class Provider extends AbstractProvider implements ProviderInterface
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'                    => $user['sub'],
             'cpf'                   => $user['sub'],
             'name'                  => $user['name'],
@@ -106,20 +92,7 @@ class Provider extends AbstractProvider implements ProviderInterface
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['environment'];
     }

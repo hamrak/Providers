@@ -11,24 +11,12 @@ class KakaoProvider extends AbstractProvider
 {
     public const IDENTIFIER = 'KAKAO';
 
-    /**
-     * Get the authentication URL for the provider.
-     *
-     * @param string $state
-     *
-     * @return string
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://kauth.kakao.com/oauth/authorize', $state);
     }
 
-    /**
-     * Get the token URL for the provider.
-     *
-     * @return string
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://kauth.kakao.com/oauth/token';
     }
@@ -36,8 +24,7 @@ class KakaoProvider extends AbstractProvider
     /**
      * Get the access token for the given code.
      *
-     * @param string $code
-     *
+     * @param  string  $code
      * @return string
      */
     public function getAccessToken($code)
@@ -52,33 +39,9 @@ class KakaoProvider extends AbstractProvider
     }
 
     /**
-     * Get the POST fields for the token request.
-     *
-     * @param string $code
-     *
-     * @return array
-     */
-    protected function getTokenFields($code)
-    {
-        $array = [
-            'grant_type'   => 'authorization_code',
-            'client_id'    => $this->clientId,
-            'redirect_uri' => $this->redirectUrl,
-            'code'         => $code,
-        ];
-
-        if ($this->clientSecret) {
-            $array['client_secret'] = $this->clientSecret;
-        }
-
-        return $array;
-    }
-
-    /**
      * Get the raw user for the given access token.
      *
-     * @param string $token
-     *
+     * @param  string  $token
      * @return array
      */
     protected function getUserByToken($token)
@@ -93,8 +56,7 @@ class KakaoProvider extends AbstractProvider
     /**
      * Map the raw user array to a Socialite User instance.
      *
-     * @param array $user
-     *
+     * @param  array  $user
      * @return \Laravel\Socialite\User
      */
     protected function mapUserToObject(array $user)
@@ -102,7 +64,7 @@ class KakaoProvider extends AbstractProvider
         $validEmail = Arr::get($user, 'kakao_account.is_email_valid');
         $verifiedEmail = Arr::get($user, 'kakao_account.is_email_verified');
 
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'        => $user['id'],
             'nickname'  => Arr::get($user, 'properties.nickname'),
             'name'      => Arr::get($user, 'properties.nickname'),

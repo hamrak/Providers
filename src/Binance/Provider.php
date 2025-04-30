@@ -10,26 +10,14 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'BINANCE';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['user:email'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://accounts.binance.com/en/oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://accounts.binance.com/en/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://accounts.binance.com/oauth/token';
     }
@@ -58,19 +46,9 @@ class Provider extends AbstractProvider
     {
         $user = $user['data'];
 
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['userId'],
             'email'    => $user['email'],
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

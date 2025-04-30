@@ -10,21 +10,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'EYEEM';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://www.eyeem.com/oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://www.eyeem.com/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.eyeem.com/v2/oauth/token';
     }
@@ -51,20 +42,10 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'     => $user['id'], 'nickname' => $user['nickname'],
             'name'   => $user['fullname'], 'email' => $user['email'],
             'avatar' => $user['photoUrl'],
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

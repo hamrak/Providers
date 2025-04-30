@@ -10,23 +10,14 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'GUMROAD';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['view_sales'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://gumroad.com/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://gumroad.com/oauth/token';
     }
@@ -52,20 +43,10 @@ class Provider extends AbstractProvider
     {
         $user = $user['user'];
 
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['user_id'],
             'nickname' => $user['twitter_handle'],
             'name'     => $user['name'],
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

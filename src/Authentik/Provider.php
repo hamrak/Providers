@@ -11,15 +11,9 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'AUTHENTIK';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['openid goauthentik.io/api profile email'];
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['base_url'];
     }
@@ -34,18 +28,12 @@ class Provider extends AbstractProvider
         return rtrim($baseurl, '/');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase($this->getBaseUrl().'/application/o/authorize/', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->getBaseUrl().'/application/o/token/';
     }
@@ -55,14 +43,28 @@ class Provider extends AbstractProvider
      */
     protected function getUserByToken($token)
     {
-        $response = $this->getHttpClient()->get(
-            $this->getBaseUrl().'/application/o/userinfo/',
-            [
-                RequestOptions::HEADERS => [
-                    'Authorization' => 'Bearer '.$token,
-                ],
-            ]
-        );
+        $response = $this->getHttpClient()->get($this->getBaseUrl().'/application/o/userinfo/', [
+            RequestOptions::HEADERS => [
+                'Authorization' => 'Bearer '.$token,
+            ],
+        ]);
+
+        return json_decode((string) $response->getBody(), true);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function refreshToken($refreshToken)
+    {
+        $response = $this->getHttpClient()->post($this->getTokenUrl(), [
+            RequestOptions::FORM_PARAMS => [
+                'client_id'     => $this->clientId,
+                'client_secret' => $this->clientSecret,
+                'grant_type'    => 'refresh_token',
+                'refresh_token' => $refreshToken,
+            ],
+        ]);
 
         return json_decode((string) $response->getBody(), true);
     }
@@ -72,7 +74,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'email'              => $user['email'] ?? null,
             'email_verified'     => $user['email_verified'] ?? null,
             'name'               => $user['name'] ?? null,

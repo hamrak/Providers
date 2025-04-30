@@ -11,7 +11,7 @@
     ],
     "authors": [
         {
-            "name": "Bal\u00e1zs Dura-Kov\u00e1cs"
+            "name": "Balázs Dura-Kovács"
         },
         {
             "name": "Anton Komarev",
@@ -24,9 +24,9 @@
         "docs": "https://socialiteproviders.com/ucl"
     },
     "require": {
-        "php": "^7.4 || ^8.0",
+        "php": "^8.0",
         "ext-json": "*",
-        "socialiteproviders/manager": "~4.0"
+        "socialiteproviders/manager": "^4.4"
     },
     "autoload": {
         "psr-4": {

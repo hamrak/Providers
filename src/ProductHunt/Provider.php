@@ -10,35 +10,16 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'PRODUCTHUNT';
 
-    /**
-     * The scopes being requested.
-     *
-     * @var array
-     */
     protected $scopes = ['public', 'private'];
 
-    /**
-     * The separating character for the requested scopes.
-     *
-     * @var string
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://api.producthunt.com/v2/oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://api.producthunt.com/v2/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.producthunt.com/v2/oauth/token';
     }
@@ -82,21 +63,11 @@ class Provider extends AbstractProvider
         $user = $user['data']['viewer']['user'] ?? [];
         $avatar = $user['profileImage'] ?? null;
 
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['id'],
             'nickname' => $user['username'],
             'name'     => $user['name'],
             'avatar'   => $avatar,
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

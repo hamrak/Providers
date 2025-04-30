@@ -10,21 +10,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'ANGELLIST';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://angel.co/api/oauth/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://angel.co/api/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://angel.co/api/oauth/token';
     }
@@ -34,13 +25,14 @@ class Provider extends AbstractProvider
      */
     protected function getUserByToken($token)
     {
-        $response = $this->getHttpClient()->get(
-            'https://api.angel.co/1/me?access_token='.$token,
-            [
-                RequestOptions::HEADERS => [
-                    'Authorization' => 'Bearer '.$token,
-                ],
-            ]
+        $response = $this->getHttpClient()->get('https://api.angel.co/1/me', [
+            RequestOptions::HEADERS => [
+                'Authorization' => 'Bearer '.$token,
+            ],
+            RequestOptions::QUERY => [
+                'access_token' => $token,
+            ],
+        ]
         );
 
         return json_decode((string) $response->getBody(), true);
@@ -51,19 +43,9 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'    => $user['id'], 'nickname' => null, 'name' => $user['name'],
             'email' => null, 'avatar' => $user['image'],
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

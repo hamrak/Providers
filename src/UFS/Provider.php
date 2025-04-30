@@ -10,23 +10,12 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'UFS';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected $scopes = [''];
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase($this->getBaseUri().'/authorization', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->getBaseUri().'/token';
     }
@@ -50,7 +39,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => null,
             'nickname' => $user['login'],
             'name'     => $user['pessoa']['nome'],
@@ -59,18 +48,7 @@ class Provider extends AbstractProvider
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return parent::getTokenFields($code) + ['grant_type' => 'authorization_code'];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['dev_mode'];
     }

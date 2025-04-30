@@ -11,31 +11,21 @@ class Provider extends AbstractProvider
     public const IDENTIFIER = 'TODOIST';
 
     public const AUTH_URL = 'https://todoist.com/oauth/authorize';
+
     public const TOKEN_URL = 'https://todoist.com/oauth/access_token';
+
     public const SYNC_URL = 'https://api.todoist.com/sync/v9/sync';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = [
         'data:read',
     ];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            self::AUTH_URL,
-            $state
-        );
+        return $this->buildAuthUrlFromBase(self::AUTH_URL, $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return self::TOKEN_URL;
     }
@@ -46,7 +36,7 @@ class Provider extends AbstractProvider
     protected function getUserByToken($token)
     {
         $response = $this->getHttpClient()->get(self::SYNC_URL, [
-            'headers' => [
+            RequestOptions::HEADERS => [
                 'Authorization' => 'Bearer '.$token,
             ],
             RequestOptions::QUERY => [
@@ -63,7 +53,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['id'],
             'name'     => $user['full_name'],
             'email'    => $user['email'],

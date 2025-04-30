@@ -14,29 +14,20 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'FLEXKIDS';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['basic'];
 
     protected $idToken;
 
     protected $uniqueUserId;
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         $bashUrl = $this->buildAuthUrlFromBase($this->getConfig('authurl'), $state);
 
         return sprintf('%s&resource=%s', $bashUrl, urlencode($this->getConfig('resource')));
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->getConfig('server').'/v2/oauth/connect/token';
     }
@@ -59,7 +50,7 @@ class Provider extends AbstractProvider
             return $data['data'];
         }
 
-        throw new AuthenticationException();
+        throw new AuthenticationException;
     }
 
     /**
@@ -67,7 +58,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $this->getUniqueUserId(),
             'nickname' => null,
             'name'     => $user['name'],
@@ -77,11 +68,10 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * @param string $code
+     * @param  string  $code
+     * @return array
      *
      * @throws AuthenticationException
-     *
-     * @return array
      */
     public function getAccessTokenResponse($code)
     {
@@ -90,7 +80,7 @@ class Provider extends AbstractProvider
                 'Accept'       => 'application/json',
                 'Content-Type' => 'application/json',
             ],
-            'json' => $this->getTokenFields($code),
+            RequestOptions::JSON => $this->getTokenFields($code),
         ]);
 
         $data = json_decode((string) $response->getBody(), true);
@@ -104,7 +94,7 @@ class Provider extends AbstractProvider
             return $data['data'];
         }
 
-        throw new AuthenticationException();
+        throw new AuthenticationException;
     }
 
     /**
@@ -113,26 +103,17 @@ class Provider extends AbstractProvider
     protected function getTokenFields($code)
     {
         return array_merge(parent::getTokenFields($code), [
-            'grant_type'     => 'authorization_code',
             'resource'       => $this->getConfig('resource'),
             'user_api_token' => $this->getConfig('apiuser'),
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['resource', 'apiuser', 'authurl', 'server'];
     }
 
-    /**
-     * @param $idToken
-     *
-     * @return Provider
-     */
-    private function setIdToken($idToken)
+    private function setIdToken(string $idToken): static
     {
         $this->idToken = $idToken;
 
@@ -156,8 +137,7 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * @param string $uniqueUserId
-     *
+     * @param  string  $uniqueUserId
      * @return Provider
      */
     public function setUniqueUserId($uniqueUserId)

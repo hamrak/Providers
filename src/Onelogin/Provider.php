@@ -9,10 +9,7 @@ use SocialiteProviders\Manager\OAuth2\User;
 
 class Provider extends AbstractProvider
 {
-    /**
-     * Unique Provider Identifier.
-     */
-    const IDENTIFIER = 'ONELOGIN';
+    public const IDENTIFIER = 'ONELOGIN';
 
     /**
      * Scopes defintions.
@@ -20,15 +17,17 @@ class Provider extends AbstractProvider
      * @see https://developers.onelogin.com/openid-connect/scopes
      */
     public const SCOPE_OPENID = 'openid';
+
     public const SCOPE_PROFILE = 'profile';
+
     public const SCOPE_EMAIL = 'email';
+
     public const SCOPE_NAME = 'name';
+
     public const SCOPE_PHONE = 'phone';
+
     public const SCOPE_OFFLINE_ACCESS = 'offline_access';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = [
         self::SCOPE_OPENID,
         self::SCOPE_PROFILE,
@@ -37,10 +36,7 @@ class Provider extends AbstractProvider
 
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function additionalConfigKeys()
+    public static function additionalConfigKeys(): array
     {
         return ['base_url'];
     }
@@ -50,18 +46,12 @@ class Provider extends AbstractProvider
         return $this->getConfig('base_url');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase($this->getOneloginUrl().'/auth', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->getOneloginUrl().'/token';
     }
@@ -72,24 +62,23 @@ class Provider extends AbstractProvider
     protected function getUserByToken($token)
     {
         $response = $this->getHttpClient()->get($this->getOneloginUrl().'/me', [
-            'headers' => [
+            RequestOptions::HEADERS => [
                 'Authorization' => 'Bearer '.$token,
             ],
         ]);
 
-        return json_decode($response->getBody(), true);
+        return json_decode((string) $response->getBody(), true);
     }
 
     /**
      * Get the client access token response.
      *
-     * @param array|string $scopes
-     *
+     * @param  array|string  $scopes
      * @return array
      */
     public function getClientAccessTokenResponse($scopes = null)
     {
-        $scopes = $scopes ?? $this->getScopes();
+        $scopes ??= $this->getScopes();
         $response = $this->getHttpClient()->post($this->getTokenUrl(), [
             RequestOptions::AUTH        => [$this->clientId, $this->clientSecret],
             RequestOptions::HEADERS     => ['Cache-Control' => 'no-cache'],
@@ -103,11 +92,10 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * @param string $refreshToken
-     *
-     * @return array
+     * @param  string  $refreshToken
+     * @return array|null
      */
-    public function getRefreshTokenResponse(string $refreshToken)
+    public function getRefreshTokenResponse($refreshToken)
     {
         $response = $this->getHttpClient()->post($this->getTokenUrl(), [
             RequestOptions::AUTH        => [$this->clientId, $this->clientSecret],
@@ -127,7 +115,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'                    => Arr::get($user, 'sub'),
             'email'                 => Arr::get($user, 'email'),
             'email_verified'        => Arr::get($user, 'email_verified', false),
@@ -144,23 +132,12 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
-        ]);
-    }
-
-    /**
-     * @param string      $idToken
-     * @param string|null $redirectUri
-     * @param string|null $state
-     *
+     * @param  string  $idToken
+     * @param  string|null  $redirectUri
+     * @param  string|null  $state
      * @return string
      */
-    public function getLogoutUrl(string $idToken, string $redirectUri = null, bool $logout = true, string $state = null)
+    public function getLogoutUrl(string $idToken, ?string $redirectUri = null, bool $logout = true, ?string $state = null)
     {
         $url = $this->getOneloginUrl().'/logout';
 
@@ -175,9 +152,8 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * @param string $token
-     * @param string $hint
-     *
+     * @param  string  $token
+     * @param  string  $hint
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function revokeToken(string $token, string $hint = 'access_token')
@@ -195,9 +171,8 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * @param string $token
-     * @param string $hint
-     *
+     * @param  string  $token
+     * @param  string  $hint
      * @return array
      */
     public function introspectToken(string $token, string $hint = 'access_token')

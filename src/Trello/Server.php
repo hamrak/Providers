@@ -27,8 +27,7 @@ class Server extends BaseServer
     /**
      * Set the access token.
      *
-     * @param string $accessToken
-     *
+     * @param  string  $accessToken
      * @return Trello
      */
     public function setAccessToken($accessToken)
@@ -76,7 +75,7 @@ class Server extends BaseServer
      */
     public function userDetails($data, TokenCredentials $tokenCredentials)
     {
-        $user = new User();
+        $user = new User;
 
         $user->nickname = $data['username'];
         $user->name = $data['fullName'];
@@ -98,9 +97,7 @@ class Server extends BaseServer
     /**
      * {@inheritdoc}
      */
-    public function userEmail($data, TokenCredentials $tokenCredentials)
-    {
-    }
+    public function userEmail($data, TokenCredentials $tokenCredentials) {}
 
     /**
      * {@inheritdoc}
@@ -123,7 +120,7 @@ class Server extends BaseServer
             'response_type' => 'fragment',
             'scope'         => $scopes ?: 'read',
             'expiration'    => Arr::get($this->parameters, 'expiration', '1day'),
-            'name'          => Arr::get($this->parameters, 'name', null),
+            'name'          => Arr::get($this->parameters, 'name'),
         ];
 
         return http_build_query($params);

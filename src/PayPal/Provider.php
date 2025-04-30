@@ -14,31 +14,16 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'PAYPAL';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['openid', 'profile', 'email'];
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(
-            'https://www.paypal.com/signin/authorize',
-            $state
-        );
+        return $this->buildAuthUrlFromBase('https://www.paypal.com/signin/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api-m.paypal.com/v1/oauth2/token';
     }
@@ -48,14 +33,14 @@ class Provider extends AbstractProvider
      */
     protected function getUserByToken($token)
     {
-        $response = $this->getHttpClient()->get(
-            'https://api-m.paypal.com/v1/identity/oauth2/userinfo?schema=paypalv1.1',
-            [
-                RequestOptions::HEADERS => [
-                    'Authorization' => 'Bearer '.$token,
-                ],
-            ]
-        );
+        $response = $this->getHttpClient()->get('https://api-m.paypal.com/v1/identity/oauth2/userinfo', [
+            RequestOptions::HEADERS => [
+                'Authorization' => 'Bearer '.$token,
+            ],
+            RequestOptions::QUERY => [
+                'schema' => 'paypalv1.1',
+            ],
+        ]);
 
         return json_decode((string) $response->getBody(), true);
     }
@@ -65,8 +50,8 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
-            'id'       => str_replace('https://www.paypal.com/webapps/auth/identity/user/', null, $user['user_id']),
+        return (new User)->setRaw($user)->map([
+            'id'       => str_replace('https://www.paypal.com/webapps/auth/identity/user/', '', $user['user_id']),
             'nickname' => null,
             'name'     => $user['name'] ?? null,
             'email'    => collect($user['emails'] ?? [])->firstWhere('primary')['value'] ?? null,
@@ -87,6 +72,6 @@ class Provider extends AbstractProvider
             RequestOptions::FORM_PARAMS => $this->getTokenFields($code),
         ]);
 
-        return json_decode($response->getBody(), true);
+        return json_decode((string) $response->getBody(), true);
     }
 }

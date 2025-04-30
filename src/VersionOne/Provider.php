@@ -12,30 +12,20 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'VERSIONONE';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['apiv1 query-api-1.0'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://www11.v1host.com/V1Integrations/oauth.v1/auth', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://www11.v1host.com/V1Integrations/oauth.v1/token';
     }
 
     /**
-     * @param string $code
-     *
+     * @param  string  $code
      * @return string
      */
     public function getAccessToken($code)
@@ -95,20 +85,10 @@ class Provider extends AbstractProvider
 
         $user = $user[0][0];
 
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => str_replace('Member:', '', $user['_oid']),
             'nickname' => $user['Username'], 'name' => $user['Name'],
             'email'    => $user['Email'], 'avatar' => Arr::get($user, 'Avatar.Content'),
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

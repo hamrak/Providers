@@ -2,6 +2,7 @@
 
 namespace SocialiteProviders\Odnoklassniki;
 
+use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Arr;
 use SocialiteProviders\Manager\OAuth2\AbstractProvider;
 use SocialiteProviders\Manager\OAuth2\User;
@@ -10,28 +11,16 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'ODNOKLASSNIKI';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['VALUABLE_ACCESS', 'GET_EMAIL'];
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopeSeparator = ';';
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://connect.ok.ru/oauth/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.ok.ru/oauth/token.do';
     }
@@ -47,15 +36,15 @@ class Provider extends AbstractProvider
 
         $sign = 'application_key='.$publicKey.'format=jsonmethod=users.getCurrentUser'.$secretKey;
 
-        $params = http_build_query([
-            'method'          => 'users.getCurrentUser',
-            'format'          => 'json',
-            'application_key' => $publicKey,
-            'sig'             => md5($sign),
-            'access_token'    => $token,
+        $response = $this->getHttpClient()->get('https://api.odnoklassniki.ru/fb.do', [
+            RequestOptions::QUERY => [
+                'method'          => 'users.getCurrentUser',
+                'format'          => 'json',
+                'application_key' => $publicKey,
+                'sig'             => md5($sign),
+                'access_token'    => $token,
+            ],
         ]);
-
-        $response = $this->getHttpClient()->get('https://api.odnoklassniki.ru/fb.do?'.$params);
 
         return json_decode((string) $response->getBody(), true);
     }
@@ -65,22 +54,12 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => Arr::get($user, 'uid'),
             'nickname' => null,
             'name'     => Arr::get($user, 'name'),
             'email'    => Arr::get($user, 'email'),
             'avatar'   => Arr::get($user, 'pic_3'),
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

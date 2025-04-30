@@ -10,19 +10,10 @@ class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'SUPEROFFICE';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['openid'];
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopeSeparator = ' ';
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getAuthUrl($state): string
     {
         return
@@ -35,9 +26,6 @@ class Provider extends AbstractProvider
             );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getTokenUrl(): string
     {
         return sprintf(
@@ -47,24 +35,10 @@ class Provider extends AbstractProvider
     }
 
     /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code): array
-    {
-        return array_merge(
-            parent::getTokenFields($code),
-            [
-                'grant_type' => 'authorization_code',
-            ]
-        );
-    }
-
-    /**
-     * @param string $token
+     * @param  string  $token
+     * @return array
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
-     *
-     * @return array
      */
     protected function getUserByToken($token): array
     {
@@ -78,12 +52,12 @@ class Provider extends AbstractProvider
             ]
         );
 
-        return (array) json_decode((string) $response->getBody(), true);
+        return json_decode((string) $response->getBody(), true);
     }
 
-    protected function mapUserToObject(array $user): \SocialiteProviders\Manager\OAuth2\User
+    protected function mapUserToObject(array $user): User
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['EjUserId'],
             'name'     => $user['FullName'],
             'email'    => $user['EMailAddress'],
@@ -91,9 +65,6 @@ class Provider extends AbstractProvider
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function additionalConfigKeys(): array
     {
         return [
@@ -117,7 +88,7 @@ class Provider extends AbstractProvider
             $response = $this->getHttpClient()->get($url);
             $apiUrl = json_decode((string) $response->getBody(), true)['Api'];
 
-            if (!$apiUrl) {
+            if (! $apiUrl) {
                 throw new \Exception('No API URL received from '.$url);
             }
 

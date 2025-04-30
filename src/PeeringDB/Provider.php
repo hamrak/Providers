@@ -16,26 +16,19 @@ class Provider extends AbstractProvider
      * @see https://developer.okta.com/docs/reference/api/oidc/#scopes
      */
     public const SCOPE_PROFILE = 'profile';
+
     public const SCOPE_EMAIL = 'email';
+
     public const SCOPE_NETWORKS = 'networks';
 
-    /**
-     * {@inheritdoc}
-     */
     protected $scopes = ['profile email networks'];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://auth.peeringdb.com/oauth2/authorize', $state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://auth.peeringdb.com/oauth2/token/';
     }
@@ -59,20 +52,10 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'    => $user['id'],
             'name'  => $user['name'],
             'email' => $user['email'],
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getTokenFields($code)
-    {
-        return array_merge(parent::getTokenFields($code), [
-            'grant_type' => 'authorization_code',
         ]);
     }
 }

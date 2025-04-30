@@ -15,25 +15,19 @@ class Provider extends AbstractProvider
      */
     protected $openId;
 
-    /**
-     * {@inheritdoc}.
-     */
     protected $scopes = ['snsapi_userinfo'];
 
     /**
      * set Open Id.
      *
-     * @param string $openId
+     * @param  string  $openId
      */
     public function setOpenId($openId)
     {
         $this->openId = $openId;
     }
 
-    /**
-     * {@inheritdoc}.
-     */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://open.weixin.qq.com/connect/oauth2/authorize', $state);
     }
@@ -61,10 +55,7 @@ class Provider extends AbstractProvider
         ];
     }
 
-    /**
-     * {@inheritdoc}.
-     */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return 'https://api.weixin.qq.com/sns/oauth2/access_token';
     }
@@ -96,7 +87,7 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
+        return (new User)->setRaw($user)->map([
             'id'       => $user['openid'],
             'unionid'  => $user['unionid'] ?? null,
             'nickname' => $user['nickname'] ?? null,
@@ -112,8 +103,10 @@ class Provider extends AbstractProvider
     protected function getTokenFields($code)
     {
         return [
-            'appid' => $this->clientId, 'secret' => $this->clientSecret,
-            'code'  => $code, 'grant_type' => 'authorization_code',
+            'appid'      => $this->clientId,
+            'code'       => $code,
+            'grant_type' => 'authorization_code',
+            'secret'     => $this->clientSecret,
         ];
     }
 

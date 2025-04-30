@@ -12,6 +12,7 @@ use SocialiteProviders\Manager\OAuth2\User;
 class Provider extends AbstractProvider
 {
     public const IDENTIFIER = 'ADOBE';
+
     public const BASE_URL = 'https://ims-na1.adobelogin.com/ims';
 
     protected $scopes = ['openid', 'email', 'profile'];
@@ -24,13 +25,6 @@ class Provider extends AbstractProvider
     protected function getTokenUrl(): string
     {
         return self::BASE_URL.'/token';
-    }
-
-    protected function getTokenFields($code): array
-    {
-        return array_merge([
-            'grant_type' => 'authorization_code',
-        ], parent::getTokenFields());
     }
 
     /**
@@ -58,7 +52,7 @@ class Provider extends AbstractProvider
 
     protected function mapUserToObject(array $user): User
     {
-        return (new User())
+        return (new User)
             ->setRaw($user)
             ->map([
                 'id'    => $user['sub'],
